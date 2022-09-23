@@ -3,8 +3,10 @@
 namespace Laraditz\Twilio\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Laraditz\Twilio\DTO\TwilioMessageDTO;
 use Laraditz\Twilio\Events\MessageReceived;
 use Laraditz\Twilio\Events\StatusCallback;
+use Laraditz\Twilio\Models\TwilioMessage;
 
 class WebhookController extends Controller
 {
@@ -14,6 +16,22 @@ class WebhookController extends Controller
             logger()->info('Twilio message received', $request->all());
 
             event(new MessageReceived($request->all()));
+
+            $data = new TwilioMessageDTO($request->toArray());
+
+            TwilioMessage::updateOrCreate([
+                'sid' => $data->getSid(),
+            ], [
+
+                'account_sid' => $data->getAccountSid(),
+                'messaging_service_sid' => $data->getMessagingServiceSid(),
+                'direction' => $data->getDirection(),
+                'from' => $data->getFrom(),
+                'to' => $data->getTo(),
+                'body' => $data->getBody(),
+                'type' => $data->getType(),
+                'status' => $data->getStatus(),
+            ]);
         }
     }
 
