@@ -4,6 +4,7 @@ namespace Laraditz\Twilio;
 
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Twilio\Rest\Client as TwilioClient;
 
@@ -20,7 +21,7 @@ class TwilioServiceProvider extends ServiceProvider
         // $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'twilio');
         // $this->loadViewsFrom(__DIR__.'/../resources/views', 'twilio');
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        // $this->loadRoutesFrom(__DIR__.'/routes.php');
+        $this->registerRoutes();
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
@@ -84,6 +85,23 @@ class TwilioServiceProvider extends ServiceProvider
         return [
             TwilioClient::class,
             TwilioChannel::class,
+        ];
+    }
+
+    protected function registerRoutes()
+    {
+        Route::group($this->routeConfiguration(), function () {
+            Route::name('twilio.')->group(function () {
+                $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+            });
+        });
+    }
+
+    protected function routeConfiguration()
+    {
+        return [
+            'prefix' => config('twilio.route_prefix'),
+            'middleware' => config('twilio.middleware'),
         ];
     }
 }
