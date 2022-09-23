@@ -11,6 +11,8 @@ class WebhookController extends Controller
     public function receive(Request $request)
     {
         if ($request->all()) {
+            logger()->info('Twilio message received', $request->all());
+
             event(new MessageReceived($request->all()));
         }
     }
@@ -18,6 +20,8 @@ class WebhookController extends Controller
     public function status(Request $request)
     {
         if ($request->all()) {
+            logger()->info('Twilio status callback', $request->all());
+
             event(new StatusCallback($request->all()));
         }
     }
