@@ -3,6 +3,9 @@
 namespace Laraditz\Twilio\DTO;
 
 use Illuminate\Support\Str;
+use Laraditz\Twilio\Enums\MessageDirection;
+use Laraditz\Twilio\Enums\MessageStatus;
+use Laraditz\Twilio\Enums\MessageType;
 
 class TwilioMessageDTO
 {
@@ -12,7 +15,7 @@ class TwilioMessageDTO
 
     protected ?string $messagingServiceSid;
 
-    protected int $direction;
+    protected MessageDirection $direction;
 
     protected string $from;
 
@@ -20,9 +23,9 @@ class TwilioMessageDTO
 
     protected string $body;
 
-    protected int $status;
+    protected MessageStatus $status;
 
-    protected int $type;
+    protected MessageType $type;
 
     public function __construct(array $data = [])
     {
@@ -40,9 +43,9 @@ class TwilioMessageDTO
     private function setDirection(string $direction): void
     {
         if (Str::contains($direction, ['inbound', 'incoming'], true)) {
-            $this->direction = 1;
+            $this->direction = MessageDirection::Incoming;
         } else {
-            $this->direction = 2;
+            $this->direction = MessageDirection::Outgoing;
         }
     }
 
@@ -58,16 +61,16 @@ class TwilioMessageDTO
 
     private function setType(string $type): void
     {
-        $this->type = 1;
+        $this->type = MessageType::SMS;
 
         if (Str::contains($type, 'whatsapp', true)) {
-            $this->type = 2;
+            $this->type = MessageType::Whatsapp;
         }
     }
 
     private function setStatus(string $status): void
     {
-        $this->status = 1;
+        $this->status = MessageStatus::getCase(ucfirst($status));
     }
 
     public function __call($name, $arguments)

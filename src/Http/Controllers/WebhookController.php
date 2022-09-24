@@ -7,6 +7,7 @@ use Laraditz\Twilio\DTO\TwilioMessageDTO;
 use Laraditz\Twilio\Events\MessageReceived;
 use Laraditz\Twilio\Events\StatusCallback;
 use Laraditz\Twilio\Models\TwilioMessage;
+use Laraditz\Twilio\Enums\MessageStatus;
 
 class WebhookController extends Controller
 {
