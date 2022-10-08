@@ -27,6 +27,10 @@ class TwilioMessageDTO
 
     protected MessageType $type;
 
+    protected ?string $errorCode;
+
+    protected ?string $errorMessage;
+
     public function __construct(array $data = [])
     {
         $this->setSid(data_get($data, 'sid') ?? data_get($data, 'MessageSid') ?? data_get($data, 'SmsMessageSid') ?? data_get($data, 'SmsSid'));
@@ -38,6 +42,8 @@ class TwilioMessageDTO
         $this->setBody(data_get($data, 'body') ?? data_get($data, 'Body'));
         $this->setStatus(data_get($data, 'status') ?? data_get($data, 'MessageStatus') ?? data_get($data, 'SmsStatus'));
         $this->setTypeFromData($data);
+        $this->setErrorCode(data_get($data, 'ErrorCode'));
+        $this->setErrorMessage(data_get($data, 'ErrorMessage'));
     }
 
     private function setSid(string $sid): void
@@ -114,6 +120,16 @@ class TwilioMessageDTO
     private function setStatus(string $status): void
     {
         $this->status = MessageStatus::getCase(ucfirst($status));
+    }
+
+    private function setErrorCode(string|null $errorCode): void
+    {
+        $this->errorCode = $errorCode;
+    }
+
+    private function setErrorMessage(string|null $errorMessage): void
+    {
+        $this->errorMessage = $errorMessage;
     }
 
     public function __call($name, $arguments)

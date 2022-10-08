@@ -13,7 +13,7 @@ class TwilioMessage extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['id', 'sid', 'account_sid', 'messaging_service_sid', 'direction', 'from', 'to', 'body', 'type', 'status', 'sent_at'];
+    protected $fillable = ['id', 'sid', 'account_sid', 'messaging_service_sid', 'direction', 'from', 'to', 'body', 'type', 'status', 'sent_at', 'error_message'];
 
     protected $casts = [
         'direction' => MessageDirection::class,

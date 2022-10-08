@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('sid', 100)->nullable();
             $table->json('request')->nullable();
             $table->json('response')->nullable();
-            $table->string('error', 100)->nullable();
+            $table->string('error_code', 50)->nullable();
             $table->timestamps();
         });
     }

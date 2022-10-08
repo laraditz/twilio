@@ -19,7 +19,9 @@ class WebhookController extends Controller
 
             event(new MessageReceived($request->all()));
 
-            app(Twilio::class)->saveMessage($request->toArray());
+            $data = new TwilioMessageDTO($request->toArray());
+
+            app(Twilio::class)->saveMessage($data);
         }
     }
 
@@ -30,7 +32,9 @@ class WebhookController extends Controller
 
             event(new StatusCallback($request->all()));
 
-            app(Twilio::class)->updateMessageStatus($request->toArray());
+            $data = new TwilioMessageDTO($request->toArray());
+
+            app(Twilio::class)->updateMessageStatus($data);
         }
     }
 }

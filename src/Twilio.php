@@ -81,7 +81,8 @@ class Twilio
                         'response' => $message->toArray(),
                     ]);
 
-                    $this->saveMessage($message->toArray());
+                    $messageData = new TwilioMessageDTO($message->toArray());
+                    $this->saveMessage($messageData);
                 });
             }
 
@@ -91,10 +92,8 @@ class Twilio
         }
     }
 
-    public function saveMessage(array $items)
+    public function saveMessage(TwilioMessageDTO $data)
     {
-        $data = new TwilioMessageDTO($items);
-
         TwilioMessage::updateOrCreate([
             'sid' => $data->getSid(),
         ], [
@@ -110,18 +109,33 @@ class Twilio
         ]);
     }
 
-    public function updateMessageStatus(array $items)
+    public function updateMessageStatus(TwilioMessageDTO $data)
     {
-        $data = new TwilioMessageDTO($items);
-
         $twilioMessage = TwilioMessage::where('sid', $data->getSid())->first();
 
         if ($twilioMessage) {
             $twilioMessage->update([
-                'status' =>  $data->getStatus()
+                'status' =>  $data->getStatus(),
+                'error_message' =>  $data->getErrorMessage(),
             ]);
+
+            if ($data->getErrorMessage()) {
+                $this->updateLogError($data);
+            }
         } else {
-            $this->saveMessage($items);
+            $this->saveMessage($data);
+        }
+    }
+
+    public function updateLogError(TwilioMessageDTO $data)
+    {
+        $twilioLog = TwilioLog::where('sid', $data->getSid())->first();
+
+        if ($twilioLog) {
+            $twilioLog->update([
+                'error_code' =>  $data->getErrorCode(),
+                'error_message' =>  $data->getErrorMessage(),
+            ]);
         }
     }
 }
