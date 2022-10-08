@@ -69,9 +69,10 @@ class Twilio
                 );
 
             if ($message->sid) {
-                DB::transaction(function () use ($to, $params, $message) {
+                $source = __METHOD__;
+                DB::transaction(function () use ($source, $to, $params, $message) {
                     TwilioLog::create([
-                        'source' => __METHOD__,
+                        'source' => $source,
                         'sid' => $message->sid,
                         'request' => [
                             'to' => $to,
