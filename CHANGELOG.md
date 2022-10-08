@@ -2,6 +2,18 @@
 
 All notable changes to `laraditz/twilio` will be documented in this file
 
+## 1.0.1 - 2022-10-09
+
+
+### Added
+- Add webhook params support for `TwilioMessageDTO`.
+- Add `saveMessage`, `updateMessageStatus`, `updateLogError` to `Twilio` class.
+- Add `error_message` to `twilio_logs` and `twilio_messages` tables.
+
+### Changed
+- Refactor webhook.
+
+
 ## 1.0.0 - 2022-09-26
 
 - Initial release
