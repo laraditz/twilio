@@ -11,7 +11,7 @@ class TwilioLog extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['id', 'source', 'sid', 'request', 'response', 'error'];
+    protected $fillable = ['id', 'source', 'sid', 'request', 'response', 'error_code', 'error_message'];
 
     /**
      * The attributes that should be cast.
