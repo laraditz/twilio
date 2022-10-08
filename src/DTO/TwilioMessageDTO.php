@@ -30,8 +30,8 @@ class TwilioMessageDTO
     public function __construct(array $data = [])
     {
         $this->setSid(data_get($data, 'sid') ?? data_get($data, 'MessageSid') ?? data_get($data, 'SmsMessageSid') ?? data_get($data, 'SmsSid'));
-        $this->setAccountSid(data_get($data, 'account_sid') ?? data_get($data, 'AccountSid'));
-        $this->setMessagingServiceSid(data_get($data, 'messaging_service_sid'));
+        $this->setAccountSid(data_get($data, 'account_sid') ?? data_get($data, 'accountSid') ?? data_get($data, 'AccountSid'));
+        $this->setMessagingServiceSid(data_get($data, 'messaging_service_sid') ?? data_get($data, 'messagingServiceSid'));
         $this->setFrom(data_get($data, 'from') ?? data_get($data, 'From'));
         $this->setTo(data_get($data, 'to') ?? data_get($data, 'To'));
         $this->setDirectionFromData($data);
