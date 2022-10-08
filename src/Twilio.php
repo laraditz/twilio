@@ -2,7 +2,10 @@
 
 namespace Laraditz\Twilio;
 
+use Illuminate\Support\Facades\DB;
+use Laraditz\Twilio\DTO\TwilioMessageDTO;
 use Laraditz\Twilio\Models\TwilioLog;
+use Laraditz\Twilio\Models\TwilioMessage;
 use Twilio\Rest\Client as TwilioClient;
 
 class Twilio
@@ -66,20 +69,58 @@ class Twilio
                 );
 
             if ($message->sid) {
-                TwilioLog::create([
-                    'source' => __METHOD__,
-                    'sid' => $message->sid,
-                    'request' => [
-                        'to' => $to,
-                        'params' => $params,
-                    ],
-                    'response' => $message->toArray(),
-                ]);
+                DB::transaction(function () use ($to, $params, $message) {
+                    TwilioLog::create([
+                        'source' => __METHOD__,
+                        'sid' => $message->sid,
+                        'request' => [
+                            'to' => $to,
+                            'params' => $params,
+                        ],
+                        'response' => $message->toArray(),
+                    ]);
+
+                    $this->saveMessage($message->toArray());
+                });
             }
 
             return $message;
         } catch (\Throwable $th) {
             throw $th;
+        }
+    }
+
+    public function saveMessage(array $items)
+    {
+        $data = new TwilioMessageDTO($items);
+
+        TwilioMessage::updateOrCreate([
+            'sid' => $data->getSid(),
+        ], [
+
+            'account_sid' => $data->getAccountSid(),
+            'messaging_service_sid' => $data->getMessagingServiceSid(),
+            'direction' => $data->getDirection(),
+            'from' => $data->getFrom(),
+            'to' => $data->getTo(),
+            'body' => $data->getBody(),
+            'type' => $data->getType(),
+            'status' => $data->getStatus(),
+        ]);
+    }
+
+    public function updateMessageStatus(array $items)
+    {
+        $data = new TwilioMessageDTO($items);
+
+        $twilioMessage = TwilioMessage::where('sid', $data->getSid())->first();
+
+        if ($twilioMessage) {
+            $twilioMessage->update([
+                'status' =>  $data->getStatus()
+            ]);
+        } else {
+            $this->saveMessage($items);
         }
     }
 }

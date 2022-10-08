@@ -21,7 +21,7 @@ class TwilioMessageDTO
 
     protected string $to;
 
-    protected string $body;
+    protected ?string $body;
 
     protected MessageStatus $status;
 
@@ -29,24 +29,52 @@ class TwilioMessageDTO
 
     public function __construct(array $data = [])
     {
-        $this->sid = data_get($data, 'sid');
-        $this->accountSid = data_get($data, 'account_sid');
-        $this->messagingServiceSid = data_get($data, 'messaging_service_sid');
-        $this->setDirection(data_get($data, 'direction'));
-        $this->setFrom(data_get($data, 'from'));
-        $this->setTo(data_get($data, 'to'));
-        $this->body = data_get($data, 'body');
-        $this->setStatus(data_get($data, 'status'));
-        $this->setType(data_get($data, 'from'));
+        $this->setSid(data_get($data, 'sid') ?? data_get($data, 'MessageSid') ?? data_get($data, 'SmsMessageSid') ?? data_get($data, 'SmsSid'));
+        $this->setAccountSid(data_get($data, 'account_sid') ?? data_get($data, 'AccountSid'));
+        $this->setMessagingServiceSid(data_get($data, 'messaging_service_sid'));
+        $this->setFrom(data_get($data, 'from') ?? data_get($data, 'From'));
+        $this->setTo(data_get($data, 'to') ?? data_get($data, 'To'));
+        $this->setDirectionFromData($data);
+        $this->setBody(data_get($data, 'body') ?? data_get($data, 'Body'));
+        $this->setStatus(data_get($data, 'status') ?? data_get($data, 'MessageStatus') ?? data_get($data, 'SmsStatus'));
+        $this->setTypeFromData($data);
     }
 
-    private function setDirection(string $direction): void
+    private function setSid(string $sid): void
     {
-        if (Str::contains($direction, ['inbound', 'incoming'], true)) {
-            $this->direction = MessageDirection::Incoming;
-        } else {
-            $this->direction = MessageDirection::Outgoing;
+        $this->sid = $sid;
+    }
+
+    private function setMessagingServiceSid(string|null $messagingServiceSid): void
+    {
+        $this->messagingServiceSid = $messagingServiceSid;
+    }
+
+    private function setAccountSid(string $accountSid): void
+    {
+        $this->accountSid = $accountSid;
+    }
+
+    private function setDirectionFromData(array $data): void
+    {
+        $direction = data_get($data, 'direction');
+
+        if ($direction) {
+            if (Str::contains($direction, ['inbound', 'incoming'], true)) {
+                $this->setDirection(MessageDirection::Incoming);
+            } else {
+                $this->setDirection(MessageDirection::Outgoing);
+            }
+        } elseif (Str::contains(config('twilio.from'), $this->from,)) {
+            $this->setDirection(MessageDirection::Outgoing);
+        } elseif (Str::contains(config('twilio.from'), $this->to)) {
+            $this->setDirection(MessageDirection::Incoming);
         }
+    }
+
+    private function setDirection(MessageDirection $direction): void
+    {
+        $this->direction = $direction;
     }
 
     private function setFrom(string $from): void
@@ -59,13 +87,28 @@ class TwilioMessageDTO
         $this->to =  Str::after($to, '+');
     }
 
-    private function setType(string $type): void
+    private function setBody(string|null $body): void
     {
-        $this->type = MessageType::SMS;
+        $this->body = $body;
+    }
 
-        if (Str::contains($type, 'whatsapp', true)) {
-            $this->type = MessageType::Whatsapp;
+    private function setTypeFromData(array $data): void
+    {
+        $this->setType(MessageType::SMS);
+        $from = data_get($data, 'from') ?? data_get($data, 'From');
+
+        if (data_get($data, 'ChannelPrefix') === 'whatsapp') {
+            $this->setType(MessageType::Whatsapp);
+        } elseif (isset($data['WaId']) && data_get($data, 'WaId')) {
+            $this->setType(MessageType::Whatsapp);
+        } elseif (Str::contains($from, 'whatsapp', true)) {
+            $this->setType(MessageType::Whatsapp);
         }
+    }
+
+    private function setType(MessageType $type): void
+    {
+        $this->type = $type;
     }
 
     private function setStatus(string $status): void
